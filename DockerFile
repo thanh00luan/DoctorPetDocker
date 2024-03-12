@@ -1,0 +1,18 @@
+# Bước build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+WORKDIR /src
+
+# Copy and restore dependencies
+COPY UserAPI/UserAPI.csproj UserAPI/
+COPY BussinessObjects/BussinessObjects.csproj BussinessObjects/
+COPY DataAccess/DataAccess.csproj DataAccess/
+RUN dotnet restore UserAPI/UserAPI.csproj
+
+COPY . .
+RUN dotnet publish -c release -o /app
+
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
+WORKDIR /app
+COPY --from=build /app .
+
+ENTRYPOINT ["dotnet", "UserAPI.dll"]
